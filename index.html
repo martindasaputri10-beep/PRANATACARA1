@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Mengurutkan Teks Pranatacara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0B192C; /* Dark Blue */
+            --secondary: #FFD700; /* Gold */
+            --accent: #FF6500; /* Orange */
+            --white: #FFFFFF;
+            --light-bg: #F8F9FA;
+            --text-dark: #333333;
+            --success: #28a745;
+            --danger: #dc3545;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --shadow-hover: 0 8px 15px rgba(255, 215, 0, 0.3);
+            --radius: 12px;
+            --font-main: 'Poppins', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: var(--font-main);
+        }
+
+        body {
+            background-color: var(--primary);
+            background-image: radial-gradient(circle at 10% 20%, rgba(255, 215, 0, 0.05) 0%, transparent 20%), 
+                              radial-gradient(circle at 90% 80%, rgba(255, 101, 0, 0.05) 0%, transparent 20%);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #1a2a40);
+            color: var(--secondary);
+            text-align: center;
+            padding: 20px;
+            border-bottom: 4px solid var(--secondary);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        header p {
+            color: var(--white);
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-panel {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 30px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border-top: 5px solid var(--secondary);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 215, 0, 0.2);
+        }
+
+        .btn {
+            background: var(--secondary);
+            color: var(--primary);
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            text-decoration: none;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #e6c200;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary { background: var(--secondary); color: var(--primary); }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-danger:hover { background: #c82333; box-shadow: 0 4px 10px rgba(220, 53, 69, 0.3); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-success:hover { background: #218838; box-shadow: 0 4px 10px rgba(40, 167, 69, 0.3); }
+        .btn-outline { background: transparent; border: 2px solid var(--secondary); color: var(--secondary); }
+        .btn-outline:hover { background: var(--secondary); color: var(--primary); }
+
+        .game-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            background: var(--white);
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 5px solid var(--accent);
+        }
+
+        .timer {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .controls .btn {
+            width: auto;
+            padding: 8px 15px;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        .card-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .text-card {
+            background: var(--white);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            cursor: grab;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            transition: all 0.2s ease;
+            position: relative;
+            user-select: none; /* Prevent text selection while dragging/tapping */
+        }
+
+        .text-card:hover {
+            transform: translateX(5px);
+            border-left-color: var(--secondary);
+            box-shadow: var(--shadow);
+        }
+
+        .text-card:active {
+            cursor: grabbing;
+        }
+
+        .text-card.dragging {
+            opacity: 0.5;
+            background: var(--light-bg);
+            border: 2px dashed var(--primary);
+        }
+
+        /* Mobile Tap-to-Swap highlight */
+        .text-card.selected {
+            background: #fff8d6;
+            border: 2px solid var(--accent);
+            border-left: 5px solid var(--accent);
+            transform: scale(1.02);
+            z-index: 10;
+            box-shadow: 0 0 15px rgba(255, 101, 0, 0.4);
+        }
+        
+        .drag-hint {
+            color: var(--white);
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            background: rgba(0,0,0,0.2);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .result-score {
+            font-size: 4rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin: 10px 0;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-stats {
+            background: var(--light-bg);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .result-stats p {
+            margin-bottom: 5px;
+            font-size: 1.05rem;
+        }
+
+        .result-comment {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 2px dashed var(--secondary);
+            border-radius: 8px;
+        }
+
+        .discussion-item {
+            background: var(--white);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            border-left: 5px solid #ccc;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        .discussion-item.correct { border-left-color: var(--success); }
+        .discussion-item.incorrect { border-left-color: var(--danger); }
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 5px;
+        }
+        .badge-correct { background: var(--success); }
+        .badge-incorrect { background: var(--danger); }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background: var(--white);
+            width: 90%;
+            max-width: 500px;
+            border-radius: var(--radius);
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 10px;
+        }
+
+        .structure-list {
+            text-align: left;
+            padding-left: 20px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 600px) {
+            .controls { justify-content: center; }
+            .btn { width: 100%; margin-bottom: 10px; }
+            .controls .btn { width: 48%; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🎓 Susun Teks Pranatacara</h1>
+        <p>Uji kemampuanmu mengurutkan teks pranatacara Bahasa Jawa dengan tepat!</p>
+    </header>
+
+    <div class="container">
+        
+        <section id="start-screen" class="screen active">
+            <div class="card-panel">
+                <h2 style="color: var(--primary); margin-bottom: 20px;">Selamat Datang!</h2>
+                <p style="margin-bottom: 25px; color: #555;">Silakan masukkan identitas untuk memulai permainan.</p>
+                
+                <div class="input-group">
+                    <label for="studentName">Nama Lengkap Siswa</label>
+                    <input type="text" id="studentName" placeholder="Contoh: Budi Santoso" autocomplete="off">
+                </div>
+                
+                <div class="input-group">
+                    <label for="studentClass">Kelas</label>
+                    <input type="text" id="studentClass" placeholder="Contoh: XI MIPA 1" autocomplete="off">
+                </div>
+                
+                <button class="btn btn-primary" onclick="startGame()" style="margin-top: 10px;">
+                    🚀 MULAI PERMAINAN
+                </button>
+            </div>
+        </section>
+
+        <section id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="timer">
+                    ⏱ <span id="time-display">00:00</span>
+                </div>
+                <div class="controls">
+                    <button class="btn btn-outline" onclick="showHelp()">💡 Petunjuk</button>
+                    <button class="btn btn-outline" onclick="showStructure()">📋 Struktur</button>
+                </div>
+            </div>
+
+            <p class="drag-hint">💻 <b>Laptop:</b> Drag & Drop kartu. <br> 📱 <b>HP:</b> Ketuk kartu pertama, lalu ketuk kartu kedua untuk menukar.</p>
+
+            <div class="card-container" id="card-container">
+                <!-- Cards will be generated here by JS -->
+            </div>
+
+            <div class="card-panel" style="margin-top: 20px; display: flex; flex-wrap: wrap; gap: 10px; padding: 20px;">
+                <button class="btn btn-primary" onclick="checkAnswer()" style="flex: 1; min-width: 200px;">✅ CEK JAWABAN</button>
+                <button class="btn btn-outline" onclick="shuffleCards()" style="flex: 1; min-width: 140px;">🔀 ACAK ULANG</button>
+                <button class="btn btn-danger" onclick="resetGame()" style="flex: 1; min-width: 140px;">🔄 RESET</button>
+            </div>
+        </section>
+
+        <section id="result-screen" class="screen">
+            <div class="card-panel">
+                <h2 style="color: var(--accent); font-size: 1.8rem;">🎉 PERMAINAN SELESAI! 🎉</h2>
+                
+                <div class="result-score" id="final-score">100</div>
+                <p style="font-weight: 600; color: #666;">NILAI ANDA</p>
+
+                <div class="result-stats">
+                    <p>👤 <b>Nama:</b> <span id="res-name"></span></p>
+                    <p>🏫 <b>Kelas:</b> <span id="res-class"></span></p>
+                    <p>🎯 <b>Posisi Benar:</b> <span id="res-correct"></span> dari 20</p>
+                    <p>⏱ <b>Waktu:</b> <span id="res-time"></span></p>
+                </div>
+
+                <div class="result-comment" id="result-comment">
+                    Sangat baik!
+                </div>
+
+                <button class="btn btn-success" onclick="sendToWhatsApp()">📱 KIRIM HASIL KE GURU</button>
+                <button class="btn btn-primary" onclick="showDiscussion()">📋 LIHAT PEMBAHASAN</button>
+                <button class="btn btn-outline" onclick="playAgain()">🔄 MAIN LAGI</button>
+            </div>
+        </section>
+
+        <section id="discussion-screen" class="screen">
+            <div class="card-panel" style="background: transparent; box-shadow: none; padding: 0;">
+                <h2 style="color: var(--white); margin-bottom: 20px; background: var(--primary); padding: 15px; border-radius: 8px; border-left: 5px solid var(--secondary);">📋 Pembahasan Susunan</h2>
+                
+                <div id="discussion-container">
+                    <!-- Discussion items generated by JS -->
+                </div>
+
+                <button class="btn btn-primary" onclick="backToResult()" style="margin-top: 20px;">⬅ KEMBALI KE HASIL</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Help Modal -->
+    <div class="modal-overlay" id="help-modal">
+        <div class="modal-content">
+            <h2>💡 Petunjuk Permainan</h2>
+            <p style="margin-bottom: 15px; line-height: 1.6;">
+                Susunlah potongan-potongan teks pranatacara dari pembukaan sampai penutup sesuai urutan yang benar.
+            </p>
+            <p style="margin-bottom: 15px; line-height: 1.6;">
+                <b>Cara bermain:</b><br>
+                - <b>Di Laptop:</b> Klik, tahan, lalu geser (drag & drop) kartu ke posisi yang diinginkan.<br>
+                - <b>Di HP:</b> Ketuk (klik) kartu yang ingin dipindah (akan menyala kuning), lalu ketuk kartu lain atau posisi tujuan untuk menukarnya.
+            </p>
+            <button class="btn btn-primary" onclick="closeModal('help-modal')">Paham</button>
+        </div>
+    </div>
+
+    <!-- Structure Modal -->
+    <div class="modal-overlay" id="structure-modal">
+        <div class="modal-content">
+            <h2>📋 Struktur Acara</h2>
+            <p style="margin-bottom: 10px; font-size: 0.9rem; color: #555;">Berikut adalah urutan nama acara (tanpa teks lengkapnya) sebagai panduan:</p>
+            <ol class="structure-list">
+                <li>Pambuka</li>
+                <li>Panggih temanten</li>
+                <li>Gantalan</li>
+                <li>Ngidak tigan</li>
+                <li>Ngumbah suku</li>
+                <li>Sinduran</li>
+                <li>Dulangan lan ngunjuk tirta</li>
+                <li>Kacar-kucur</li>
+                <li>Bobot timbang</li>
+                <li>Sungkem</li>
+                <li>Penutup</li>
+            </ol>
+            <button class="btn btn-primary" onclick="closeModal('structure-modal')">Tutup</button>
+        </div>
+    </div>
+
+    <script>
+        // Data Teks Pranatacara (Correct Order)
+        const originalTexts = [
+            "Assalamualaikum Wr. Wb.",
+            "Para rawuh ingkang kula hormati, para keluarga temanten ingkang bahagia,",
+            "sumangga kita sedaya ngaturaken puji syukur dhumateng Gusti Kang Maha Agung, ingkang sampun maringi kita sedaya nikmat lan rahmat saengga kula lan panjenengan saged kempal wonten dinten niki kanthi sehat wal’afiat.",
+            "Shalawat kalian salam sumangga ugi kita aturaken dhumateng junjungan kita, Nabi Muhammad SAW.",
+            "Kita sedaya kempal wonten papan menika kangge sareng-sareng mirsani adicara temantenipun Nimas Ayu Nanda (putri saking Bapak Bambang) kaliyan Dhimas Bagus Rizal (putra saking Bapak Majid).",
+            "Sakderengipun, kula dados pranatacara wonten dinten niki badhe ngaturaken rantamaning adicara sakmenika, nun inggih:",
+            "Adicara kaping pisan inggih menika pambuka. Sumangga adicara menika dipunbuka sesarengan maos Al-fatihah, mugi-mugi adicara samangke saged lancar, aamiin.",
+            "Saklajengipun, adicara kaping kalih, panggih temanten. Sakmenika temanten putri mijil saking papan anggene mbusanani awak kangge kepanggih temanten kakung.",
+            "Adicara ingkang kaping tiga, inggih menika gantalan.",
+            "Mantic adicara kaping sekawan, inggih menika ngidak tigan.",
+            "Adicara ingkang kaping gangsal, ngumbah suku temanten kakung ingkang dipuntindakaken dening temanten putri.",
+            "Adicara kaping enem inggih menika sinduran.",
+            "Lajeng dhateng adicara kaping pitu, dulangan lan ngunjuk tirta ingkang dipuntindakaken temanten putri kaliyan temanten kakung.",
+            "Adicara kaping wolu, kacar-kucur, ingkang ngandahaki makna menawi temanten kakung nggadah kawajiban nafkahi keluarga.",
+            "Lajeng mancing adicara kaping songo, bobot timbang.",
+            "Saklajengipun inggih menika adicara sungkeman temanten kakung kaliyan temanten putri dhumateng bapak kaliyan ibu.",
+            "Para rawuh lan keluarga temanten ingkang bahagia, saking pangestu penjengengan sedaya adicara panggih temanten dinten niki saged rampung kanthi lancar.",
+            "Kula aturakaen matur suwun ingkang kathah dhumateng panjenengan sedaya. Saklajengipun, kula dados pranatacara ngaturaken pangapunten ingkang kathah, menawi kula wonten kalepatan lan ugi babagan ingkang kirang trep dhumateng panjenengan sedaya.",
+            "Cekap semanten atur kula, mugi-mugi Mbak Nanda kaliyan Mas Rizal saged mbangun keluarga ingkang sakinah, mawaddah, lan waramah. Aamiin aamiin yaa Rabbal’alamin.",
+            "Wassalamualaikum Wr. Wb."
+        ];
+
+        // Game State
+        let gameState = {
+            name: '',
+            className: '',
+            cards: [], // Array of objects {id, text}
+            timerSeconds: 0,
+            timerInterval: null,
+            selectedCardIndex: null, // For mobile tap-to-swap
+            finalScore: 0,
+            correctCount: 0
+        };
+
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function startGame() {
+            const nameInput = document.getElementById('studentName').value.trim();
+            const classInput = document.getElementById('studentClass').value.trim();
+
+            if (!nameInput || !classInput) {
+                alert("Harap isi Nama dan Kelas terlebih dahulu!");
+                return;
+            }
+
+            gameState.name = nameInput;
+            gameState.className = classInput;
+            
+            initGameData();
+            startTimer();
+            switchScreen('game-screen');
+        }
+
+        function initGameData() {
+            // Map to objects with original correct ID (1 to 20)
+            let rawCards = originalTexts.map((text, index) => ({
+                id: index + 1,
+                text: text
+            }));
+            
+            // Shuffle
+            gameState.cards = shuffleArray([...rawCards]);
+            renderCards();
+        }
+
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function shuffleCards() {
+            gameState.cards = shuffleArray([...gameState.cards]);
+            gameState.selectedCardIndex = null;
+            renderCards();
+        }
+
+        function resetGame() {
+            if(confirm("Apakah Anda yakin ingin mengulang dari awal? Waktu akan terus berjalan.")) {
+                initGameData();
+            }
+        }
+
+        function startTimer() {
+            clearInterval(gameState.timerInterval);
+            gameState.timerSeconds = 0;
+            updateTimerDisplay();
+            gameState.timerInterval = setInterval(() => {
+                gameState.timerSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const mins = Math.floor(gameState.timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (gameState.timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('time-display').innerText = `${mins}:${secs}`;
+        }
+
+        function stopTimer() {
+            clearInterval(gameState.timerInterval);
+        }
+
+        function getFormattedTime() {
+            const mins = Math.floor(gameState.timerSeconds / 60);
+            const secs = gameState.timerSeconds % 60;
+            return `${mins} menit ${secs} detik`;
+        }
+
+        function renderCards() {
+            const container = document.getElementById('card-container');
+            container.innerHTML = '';
+
+            gameState.cards.forEach((card, index) => {
+                const cardEl = document.createElement('div');
+                cardEl.className = 'text-card';
+                cardEl.draggable = true;
+                cardEl.dataset.index = index; // Current position in array
+                cardEl.dataset.id = card.id; // Original correct position
+                cardEl.innerText = card.text;
+
+                // If this card is currently selected (Mobile Tap-to-Swap)
+                if (gameState.selectedCardIndex === index) {
+                    cardEl.classList.add('selected');
+                }
+
+                // --- DRAG AND DROP EVENTS (Desktop) ---
+                cardEl.addEventListener('dragstart', handleDragStart);
+                cardEl.addEventListener('dragover', handleDragOver);
+                cardEl.addEventListener('drop', handleDrop);
+                cardEl.addEventListener('dragend', handleDragEnd);
+                
+                // --- TAP EVENTS (Mobile/Fallback) ---
+                cardEl.addEventListener('click', () => handleCardTap(index));
+
+                container.appendChild(cardEl);
+            });
+        }
+
+        // Drag & Drop Handlers
+        let draggedIndex = null;
+
+        function handleDragStart(e) {
+            draggedIndex = parseInt(this.dataset.index);
+            this.classList.add('dragging');
+            e.dataTransfer.effectAllowed = "move";
+            // Required for Firefox
+            e.dataTransfer.setData("text/plain", draggedIndex); 
+            // Clear mobile tap selection if dragging starts
+            gameState.selectedCardIndex = null;
+            renderCards(); // to remove selection highlight
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault(); // Necessary to allow dropping
+            e.dataTransfer.dropEffect = "move";
+            return false;
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const targetIndex = parseInt(this.dataset.index);
+            
+            if (draggedIndex !== null && draggedIndex !== targetIndex) {
+                // Swap in array
+                const temp = gameState.cards[draggedIndex];
+                gameState.cards[draggedIndex] = gameState.cards[targetIndex];
+                gameState.cards[targetIndex] = temp;
+                
+                renderCards();
+            }
+            return false;
+        }
+
+        function handleDragEnd() {
+            this.classList.remove('dragging');
+            draggedIndex = null;
+        }
+
+        // Tap-to-Swap Handler (Mobile)
+        function handleCardTap(index) {
+            if (gameState.selectedCardIndex === null) {
+                // First tap: select card
+                gameState.selectedCardIndex = index;
+            } else {
+                // Second tap
+                if (gameState.selectedCardIndex === index) {
+                    // Tap same card -> deselect
+                    gameState.selectedCardIndex = null;
+                } else {
+                    // Tap different card -> swap
+                    const temp = gameState.cards[gameState.selectedCardIndex];
+                    gameState.cards[gameState.selectedCardIndex] = gameState.cards[index];
+                    gameState.cards[index] = temp;
+                    gameState.selectedCardIndex = null;
+                }
+            }
+            renderCards();
+        }
+
+        function checkAnswer() {
+            if(!confirm("Yakin ingin mengumpulkan jawaban?")) return;
+
+            stopTimer();
+            let correctCount = 0;
+            
+            // Calculate score
+            gameState.cards.forEach((card, index) => {
+                if (card.id === index + 1) {
+                    correctCount++;
+                }
+            });
+
+            // Total cards 20, max score 100 -> 5 points each
+            gameState.correctCount = correctCount;
+            gameState.finalScore = correctCount * 5;
+
+            showResultScreen();
+        }
+
+        function showResultScreen() {
+            document.getElementById('final-score').innerText = gameState.finalScore;
+            document.getElementById('res-name').innerText = gameState.name;
+            document.getElementById('res-class').innerText = gameState.className;
+            document.getElementById('res-correct').innerText = gameState.correctCount;
+            document.getElementById('res-time').innerText = getFormattedTime();
+
+            // Set comment
+            const commentEl = document.getElementById('result-comment');
+            let score = gameState.finalScore;
+            if (score >= 90) {
+                commentEl.innerText = "🌟 Sangat baik! Urutan teks pranatacara sudah dikuasai.";
+                commentEl.style.color = "var(--success)";
+                commentEl.style.borderColor = "var(--success)";
+            } else if (score >= 80) {
+                commentEl.innerText = "👍 Baik! Tinggal meningkatkan ketelitian.";
+                commentEl.style.color = "#17a2b8";
+                commentEl.style.borderColor = "#17a2b8";
+            } else if (score >= 70) {
+                commentEl.innerText = "👌 Cukup baik. Pelajari kembali urutan adicara.";
+                commentEl.style.color = "var(--accent)";
+                commentEl.style.borderColor = "var(--accent)";
+            } else {
+                commentEl.innerText = "💪 Ayo pelajari kembali struktur teks pranatacara dan coba lagi.";
+                commentEl.style.color = "var(--danger)";
+                commentEl.style.borderColor = "var(--danger)";
+            }
+
+            switchScreen('result-screen');
+        }
+
+        function showDiscussion() {
+            const container = document.getElementById('discussion-container');
+            container.innerHTML = '';
+
+            gameState.cards.forEach((card, index) => {
+                const isCorrect = card.id === index + 1;
+                
+                const itemDiv = document.createElement('div');
+                itemDiv.className = `discussion-item ${isCorrect ? 'correct' : 'incorrect'}`;
+                
+                const badge = `<span class="status-badge ${isCorrect ? 'badge-correct' : 'badge-incorrect'}">
+                                ${isCorrect ? '✅ Posisi Benar' : '❌ Posisi Salah (Harusnya urutan ke-' + card.id + ')'}
+                               </span>`;
+                
+                itemDiv.innerHTML = `
+                    ${badge}
+                    <br>
+                    <b>Urutan ${index + 1}:</b> ${card.text}
+                `;
+                
+                container.appendChild(itemDiv);
+            });
+
+            switchScreen('discussion-screen');
+        }
+
+        function backToResult() {
+            switchScreen('result-screen');
+        }
+
+        function playAgain() {
+            // Reset state except name and class
+            gameState.selectedCardIndex = null;
+            initGameData();
+            startTimer();
+            switchScreen('game-screen');
+        }
+
+        function sendToWhatsApp() {
+            const teacherPhone = "6282226116413";
+            const text = `Assalamualaikum, Pak/Bu Guru.
+
+Saya telah menyelesaikan Game Mengurutkan Teks Pranatacara.
+
+Nama: ${gameState.name}
+Kelas: ${gameState.className}
+Nilai: ${gameState.finalScore}/100
+Benar: ${gameState.correctCount} dari 20
+Waktu pengerjaan: ${getFormattedTime()}
+
+Terima kasih.`;
+
+            const encodedText = encodeURIComponent(text);
+            const waUrl = `https://wa.me/${teacherPhone}?text=${encodedText}`;
+            window.open(waUrl, '_blank');
+        }
+
+        function showHelp() {
+            document.getElementById('help-modal').style.display = 'flex';
+        }
+
+        function showStructure() {
+            document.getElementById('structure-modal').style.display = 'flex';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Close modal when clicking outside content
+        window.onclick = function(event) {
+            if (event.target.className === 'modal-overlay') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
